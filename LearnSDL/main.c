@@ -3,6 +3,10 @@
 
 #define SDL_MAIN_HANDLED
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/sdl.h>
@@ -28,10 +32,11 @@ typedef struct {
 	int y_pos;
 } Entity;
 
+void mainloop(void);
 void init_sdl(App* app);
 void prepare_scene(App* app);
 void present_scene(App* app);
-void cleanup();
+void cleanup(void);
 void handle_input(App* app);
 SDL_Texture* load_image(App* app);
 void draw_image(App* app, Entity* entity);
@@ -39,10 +44,10 @@ void draw_image(App* app, Entity* entity);
 App app;
 Entity ship;
 
-int main(int argc, int* argv[])
+int main(int argc, char* argv[])
 {
-	memset(&app, NULL, sizeof(App));
-	memset(&ship, NULL, sizeof(Entity));
+	memset(&app, 0, sizeof(App));
+	memset(&ship, 0, sizeof(Entity));
 
 	init_sdl(&app);
 	atexit(cleanup);
@@ -51,22 +56,31 @@ int main(int argc, int* argv[])
 	ship.y_pos = 100;
 	ship.texture = load_image(&app);
 
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop(mainloop, 0, 1);
+#else
 	while (1)
 	{
-		prepare_scene(&app);
-		handle_input(&app);
-
-		if (app.down) ship.y_pos += 4;
-		if (app.up) ship.y_pos -= 4;
-		if (app.left) ship.x_pos -= 4;
-		if (app.right) ship.x_pos += 4;
-
-		draw_image(&app, &ship);
-		present_scene(&app);
+		mainloop();
 		SDL_Delay(16);
 	}
+#endif
 
 	return 0;
+}
+
+void mainloop(void)
+{
+	prepare_scene(&app);
+	handle_input(&app);
+
+	if (app.down) ship.y_pos += 4;
+	if (app.up) ship.y_pos -= 4;
+	if (app.left) ship.x_pos -= 4;
+	if (app.right) ship.x_pos += 4;
+
+	draw_image(&app, &ship);
+	present_scene(&app);
 }
 
 void init_sdl(App* app)
@@ -106,7 +120,7 @@ void present_scene(App* app)
 	SDL_RenderPresent(app->renderer);
 }
 
-void cleanup()
+void cleanup(void)
 {
 	SDL_DestroyTexture(ship.texture);
 	IMG_Quit();
@@ -153,7 +167,11 @@ void handle_input(App* app)
 		switch (event.type)
 		{
 		case SDL_QUIT:
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();  /* this should "kill" the app. */
+#else
 			exit(0);
+#endif
 			break;
 		case SDL_KEYDOWN:
 			on_key_down(app, &event.key);
