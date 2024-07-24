@@ -43,7 +43,7 @@ void sdl_init(App* app);
 SDL_Texture* load_texture(App* app, const char* filename);
 void main_loop(void);
 void prepare_scene(App* app);
-void handle_input(void);
+void handle_input(App* app);
 void on_key_down(App* app, SDL_KeyboardEvent* keyboard_event);
 void on_key_up(App* app, SDL_KeyboardEvent* keyboard_event);
 void draw_texture(App* app, Entity* entity);
@@ -86,8 +86,6 @@ void error(const char* message)
 
 void cleanup(void)
 {
-	game_running = false;
-
 	SDL_DestroyTexture(ship.texture);
 
 	SDL_DestroyRenderer(app.renderer);
@@ -138,8 +136,15 @@ SDL_Texture* load_texture(App* app, const char* filename)
 
 void main_loop(void)
 {
+	if (!game_running)
+	{
+#ifdef __EMSCRIPTEN__
+		emscripten_cancel_main_loop();
+#endif
+	}
+
 	prepare_scene(&app);
-	handle_input();
+	handle_input(&app);
 
 	if (app.down_active) ship.y_pos += 4;
 	if (app.up_active) ship.y_pos -= 4;
@@ -156,7 +161,7 @@ void prepare_scene(App* app)
 	SDL_RenderClear(app->renderer);
 }
 
-void handle_input(void)
+void handle_input(App* app)
 {
 	SDL_Event event;
 
@@ -165,17 +170,13 @@ void handle_input(void)
 		switch (event.type)
 		{
 		case SDL_QUIT:
-#ifdef __EMSCRIPTEN__
-			emscripten_cancel_main_loop();
-#else
-			exit(0);
-#endif
+			game_running = false;
 			break;
 		case SDL_KEYDOWN:
-			on_key_down(&app, &event.key);
+			on_key_down(app, &event.key);
 			break;
 		case SDL_KEYUP:
-			on_key_up(&app, &event.key);
+			on_key_up(app, &event.key);
 			break;
 		default:
 			break;
