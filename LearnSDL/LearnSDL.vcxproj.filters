@@ -28,5 +28,8 @@
     <CopyFileToFolders Include="img\smiley.png">
       <Filter>Resource Files\img</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="img\spaceship.png">
+      <Filter>Resource Files\img</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

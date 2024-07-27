@@ -16,7 +16,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-#define SMILEY_IMG "img/smiley.png"
+#define SMILEY_IMG "img/spaceship.png"
 
 typedef struct _app {
 	SDL_Window* window;
@@ -212,6 +212,8 @@ void draw_texture(App* app, Entity* entity)
 	dest_rect.x = entity->x_pos;
 	dest_rect.y = entity->y_pos;
 	SDL_QueryTexture(entity->texture, NULL, NULL, &dest_rect.w, &dest_rect.h);
+	dest_rect.w /= 3;
+	dest_rect.h /= 3;
 	SDL_RenderCopy(app->renderer, entity->texture, NULL, &dest_rect);
 }
 
