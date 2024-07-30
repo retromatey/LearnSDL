@@ -17,6 +17,7 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define SMILEY_IMG "img/spaceship.png"
+#define BULLET_IMG "img/bullet.png"
 
 typedef struct _app {
 	SDL_Window* window;
@@ -25,16 +26,21 @@ typedef struct _app {
 	bool down_active;
 	bool left_active;
 	bool right_active;
+	bool fire_active;
 } App;
 
 typedef struct _entity {
 	SDL_Texture* texture;
+	int dx;
+	int dy;
 	int x_pos;
 	int y_pos;
+	bool alive;
 } Entity;
 
 App app;
 Entity ship;
+Entity bullet;
 bool game_running = true;
 
 void error(const char* message);
@@ -53,6 +59,7 @@ int main(int argc, char* argv[])
 {
 	memset(&app, 0, sizeof(App));
 	memset(&ship, 0, sizeof(Entity));
+	memset(&bullet, 0, sizeof(Entity));
 	atexit(cleanup);
 	sdl_init(&app);
 
@@ -60,9 +67,11 @@ int main(int argc, char* argv[])
 	ship.y_pos = 100;
 	ship.texture = load_texture(&app, SMILEY_IMG);
 
-	if (ship.texture == NULL)
+	bullet.texture = load_texture(&app, BULLET_IMG);
+
+	if (ship.texture == NULL || bullet.texture == NULL)
 	{
-		error("Failed to load image file");
+		error("Failed to load image file(s)");
 	}
 
 #ifdef __EMSCRIPTEN__
@@ -151,7 +160,23 @@ void main_loop(void)
 	if (app.left_active) ship.x_pos -= 4;
 	if (app.right_active) ship.x_pos += 4;
 
+	if (app.fire_active && bullet.alive == false)
+	{
+		bullet.x_pos = ship.x_pos;
+		bullet.y_pos = ship.y_pos;
+		bullet.dx = 16;
+		bullet.dy = 0;
+		bullet.alive = true;
+	}
+
+	bullet.x_pos += bullet.dx;
+	bullet.y_pos += bullet.dy;
+
+	if (bullet.x_pos > SCREEN_WIDTH) { bullet.alive = false; }
+
+	if (bullet.alive) { draw_texture(&app, &bullet); }
 	draw_texture(&app, &ship);
+
 	present_scene(&app);
 }
 
@@ -192,6 +217,7 @@ void on_key_down(App* app, SDL_KeyboardEvent* keyboard_event)
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_RIGHT) app->right_active = true;
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_UP) app->up_active = true;
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_DOWN) app->down_active = true;
+		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_SPACE) app->fire_active = true;
 	}
 }
 
@@ -203,6 +229,7 @@ void on_key_up(App* app, SDL_KeyboardEvent* keyboard_event)
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_RIGHT) app->right_active = false;
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_UP) app->up_active = false;
 		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_DOWN) app->down_active = false;
+		else if (keyboard_event->keysym.scancode == SDL_SCANCODE_SPACE) app->fire_active = false;
 	}
 }
 
