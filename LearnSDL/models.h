@@ -15,6 +15,8 @@ typedef struct _app {
 
 typedef struct _entity {
 	SDL_Texture* texture;
+	int w;
+	int h;
 	int x_pos;
 	int y_pos;
 	int dx;
