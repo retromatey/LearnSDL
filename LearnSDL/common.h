@@ -11,6 +11,8 @@
 
 #define GAME_TITLE "Game 01"
 
+#define MAX_ACTIVE_KEYBOARD_KEYS 350
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define IMG_SPACESHIP "img/spaceship.png"

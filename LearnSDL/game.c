@@ -75,10 +75,16 @@ static void handle_input(App* app)
 
 static void update_entities(App* app, Entity* ship, Entity* missile)
 {
-	if (app->down_active) { ship->y_pos += ship->dy; }
-	if (app->up_active) { ship->y_pos -= ship->dy; }
-	if (app->left_active) { ship->x_pos -= ship->dx; }
-	if (app->right_active) { ship->x_pos += ship->dx; }
+	ship->dx = 0;
+	ship->dy = 0;
+
+	if (app->down_active) { ship->dy = SPEED_SPACESHIP; }
+	if (app->up_active) { ship->dy = -SPEED_SPACESHIP; }
+	if (app->left_active) { ship->dx = -SPEED_SPACESHIP; }
+	if (app->right_active) { ship->dx = SPEED_SPACESHIP; }
+
+	ship->x_pos += ship->dx;
+	ship->y_pos += ship->dy;
 
 	if (ship->x_pos < 0) { ship->x_pos = 0; }
 	if (ship->x_pos + ship->w > SCREEN_WIDTH) { ship->x_pos = SCREEN_WIDTH - ship->w; }
