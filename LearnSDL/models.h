@@ -6,11 +6,7 @@ typedef struct _app {
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	bool game_running;
-	bool up_active;
-	bool down_active;
-	bool left_active;
-	bool right_active;
-	bool fire_active;
+	bool active_keys[MAX_ACTIVE_KEYBOARD_KEYS];
 } App;
 
 typedef struct _entity {

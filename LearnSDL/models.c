@@ -45,8 +45,8 @@ void destroy_app(App* app)
 
 void create_entities(App* app, Entity* ship, Entity* missile)
 {
-	memset(ship, 0, sizeof(App));
-	memset(missile, 0, sizeof(App));
+	memset(ship, 0, sizeof(Entity));
+	memset(missile, 0, sizeof(Entity));
 
 	ship->alive = true;
 	ship->x_pos = 100;

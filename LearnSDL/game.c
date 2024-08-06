@@ -32,23 +32,17 @@ static void draw_texture(App* app, Entity* entity, float scale)
 
 static void on_key_down(App* app, SDL_KeyboardEvent* event)
 {
-	if (event->repeat == 0)
+	if (event->repeat == 0 && event->keysym.scancode >= 0 && event->keysym.scancode < MAX_ACTIVE_KEYBOARD_KEYS)
 	{
-		if (event->keysym.scancode == SDL_SCANCODE_UP) { app->up_active = true; }
-		if (event->keysym.scancode == SDL_SCANCODE_DOWN) { app->down_active = true; }
-		if (event->keysym.scancode == SDL_SCANCODE_LEFT) { app->left_active = true; }
-		if (event->keysym.scancode == SDL_SCANCODE_RIGHT) { app->right_active = true; }
+		app->active_keys[event->keysym.scancode] = true;
 	}
 }
 
 static void on_key_up(App* app, SDL_KeyboardEvent* event)
 {
-	if (event->repeat == 0)
+	if (event->repeat == 0 && event->keysym.scancode >= 0 && event->keysym.scancode < MAX_ACTIVE_KEYBOARD_KEYS)
 	{
-		if (event->keysym.scancode == SDL_SCANCODE_UP) { app->up_active = false; }
-		if (event->keysym.scancode == SDL_SCANCODE_DOWN) { app->down_active = false; }
-		if (event->keysym.scancode == SDL_SCANCODE_LEFT) { app->left_active = false; }
-		if (event->keysym.scancode == SDL_SCANCODE_RIGHT) { app->right_active = false; }
+		app->active_keys[event->keysym.scancode] = false;
 	}
 }
 
@@ -78,10 +72,10 @@ static void update_entities(App* app, Entity* ship, Entity* missile)
 	ship->dx = 0;
 	ship->dy = 0;
 
-	if (app->down_active) { ship->dy = SPEED_SPACESHIP; }
-	if (app->up_active) { ship->dy = -SPEED_SPACESHIP; }
-	if (app->left_active) { ship->dx = -SPEED_SPACESHIP; }
-	if (app->right_active) { ship->dx = SPEED_SPACESHIP; }
+	if (app->active_keys[SDL_SCANCODE_UP]) { ship->dy = -SPEED_SPACESHIP; }
+	if (app->active_keys[SDL_SCANCODE_DOWN]) { ship->dy = SPEED_SPACESHIP; }
+	if (app->active_keys[SDL_SCANCODE_LEFT]) { ship->dx = -SPEED_SPACESHIP; }
+	if (app->active_keys[SDL_SCANCODE_RIGHT]) { ship->dx = SPEED_SPACESHIP; }
 
 	ship->x_pos += ship->dx;
 	ship->y_pos += ship->dy;
