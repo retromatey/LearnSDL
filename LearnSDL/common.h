@@ -13,6 +13,9 @@
 
 #define MAX_ACTIVE_KEYBOARD_KEYS 350
 
+#define SCALE_SHIP 0.25
+#define SCALE_MISSILE 1.0
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define IMG_SPACESHIP "img/spaceship.png"

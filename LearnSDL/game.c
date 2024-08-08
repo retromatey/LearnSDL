@@ -15,21 +15,6 @@ static void present_scene(App* app)
 	SDL_RenderPresent(app->renderer);
 }
 
-static void draw_texture(App* app, Entity* entity, float scale)
-{
-	SDL_Rect dest_rect;
-	dest_rect.x = entity->x_pos;
-	dest_rect.y = entity->y_pos;
-	SDL_QueryTexture(entity->texture, NULL, NULL, &dest_rect.w, &dest_rect.h);
-	dest_rect.w *= scale;
-	dest_rect.h *= scale;
-	SDL_RenderCopy(app->renderer, entity->texture, NULL, &dest_rect);
-
-	// TODO: not sure if this is the best place to set the Entities width & height.
-	entity->w = dest_rect.w;
-	entity->h = dest_rect.h;
-}
-
 static void on_key_down(App* app, SDL_KeyboardEvent* event)
 {
 	if (event->repeat == 0 && event->keysym.scancode >= 0 && event->keysym.scancode < MAX_ACTIVE_KEYBOARD_KEYS)
@@ -67,7 +52,7 @@ static void handle_input(App* app)
 	}
 }
 
-static void update_entities(App* app, Entity* ship, Entity* missile)
+static void update_ship(App* app, Entity* ship)
 {
 	ship->dx = 0;
 	ship->dy = 0;
@@ -87,10 +72,62 @@ static void update_entities(App* app, Entity* ship, Entity* missile)
 	if (ship->y_pos + ship->h > SCREEN_HEIGHT) { ship->y_pos = SCREEN_HEIGHT - ship->h; }
 }
 
+static void update_missile(App* app, Entity* missile, Entity* ship)
+{
+	missile->dx = SPEED_MISSILE;
+	missile->dy = 0;
+
+	if (app->active_keys[SDL_SCANCODE_SPACE] && missile->alive == false)
+	{ 
+		missile->alive = true;
+		missile->x_pos = ship->x_pos + ship->w - (missile->w);
+		missile->y_pos = ship->y_pos + (ship->h / 2) - (missile->h / 2);
+	}
+
+	if (missile->alive)
+	{
+		missile->x_pos += missile->dx;
+	}
+
+	if (missile->x_pos + missile->w > SCREEN_WIDTH)
+	{ 
+		missile->alive = false;
+	}
+}
+
+static void update_entities(App* app, Entity* ship, Entity* missile)
+{
+	update_ship(app, ship);
+	update_missile(app, missile, ship);
+}
+
+static void draw_texture(App* app, Entity* entity)
+{
+	SDL_Rect dest_rect;
+	dest_rect.x = entity->x_pos;
+	dest_rect.y = entity->y_pos;
+	dest_rect.w = entity->w;
+	dest_rect.h = entity->h;
+	SDL_RenderCopy(app->renderer, entity->texture, NULL, &dest_rect);
+}
+
+static void draw_ship(App* app, Entity* ship)
+{
+	draw_texture(app, ship);
+}
+
+static void draw_missile(App* app, Entity* missile)
+{
+	if (missile->alive)
+	{
+		draw_texture(app, missile);
+	}
+}
+
 static void draw_entities(App* app, Entity* ship, Entity* missile)
 {
-	draw_texture(app, ship, 0.25);
-	draw_texture(app, missile, 1.0);
+	draw_ship(app, ship);
+	draw_missile(app, missile);
 }
 
 static void game_loop(App* app, Entity* ship, Entity* missile, int delay)
