@@ -1,11 +1,8 @@
-#include "common.h"
-#include "game.h"
+#include <stdio.h>
 
 int main(int argc, char* argv[])
 {	
-	game_init();
-	atexit(game_destroy);
-	game_start();
+	printf("starting from scratch\n");
 
 	return 0;
 }
